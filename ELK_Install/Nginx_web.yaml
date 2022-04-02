@@ -1,0 +1,49 @@
+--- # installing Nginx    =============================================== Done ========================================
+
+- hosts: Ubuntu # check nano /etc/ansible/hosts && server ip
+  become: yes
+  tasks:
+  - name: "apt-get update"
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600    # 3600 seco..   means 1 hourse
+  
+  - name: "Install Nginx"
+    apt:  name=nginx state=latest
+  
+  # - name: "restart nginx web server"
+  #   service: name=nginx state=restarted     # restart  ex:- sudo service nginx restart
+
+  - name: "config file"
+    copy:
+      src: /home/hey-nikto/Desktop/Ansible/ELK_Install/example.conf
+      dest: /etc/nginx/sites-available/
+  
+  - name: "create symbolic link"
+    file:
+      src: /etc/nginx/sites-available/example.conf
+      dest: /etc/nginx/sites-enabled/example.conf
+      state: link
+    # notify: restart nginx
+
+  # - name: "restart nginx"
+  #   service:
+  #       name: nginx
+  #       state: restarted
+  #   become: yes
+
+  - name: "restart nginx web server"
+    service: name=nginx state=started
+
+# ================================================================== DONE ==============================================
+
+
+
+
+  
+  
+
+
+
+
+

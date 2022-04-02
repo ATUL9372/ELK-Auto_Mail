@@ -1,0 +1,32 @@
+--- # ===================================================== Done ========================================================
+
+- hosts: vbox
+  become: true
+  tasks:
+
+  - name: "Install Kibana "
+    apt: name=kibana state=latest
+
+  # - name: "Kibana Conf && #server.port: 5601"
+  #   replace: 
+  #     path: /etc/kibana/kibana.yml
+  #     regexp: '#(.*server.port: 5601.*)'  # uncomment
+  #     replace: '\1'
+
+  # - name: "Kibana Conf && #server.host: localhost"
+  #   replace: 
+  #     path: /etc/kibana/kibana.yml
+  #     regexp: '#(.*server.host: "localhost".*)' # uncomment
+  #     replace: '\1'
+
+  # - name: "Kibana Conf && #elasticsearch.hosts: http://localhost:9200 "
+  #   replace: 
+  #     path: /etc/kibana/kibana.yml
+  #     regexp: '#(.*elasticsearch.hosts:.*)' 
+  #     replace: '\1'   # 1st symbol is a #  so this command replace(remove) #
+
+  # - name: "restart Kibana"
+  #   service: name=kibana state=started
+
+
+# ================================================== Done ========================================================================

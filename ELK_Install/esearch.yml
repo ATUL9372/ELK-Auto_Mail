@@ -1,0 +1,61 @@
+--- # ===================================================== Done ==================================================
+
+- hosts: Ubuntu   #Ubuntu
+  become: true
+  tasks:
+
+  - name: "Elasticsearch public GPG key into APT"
+    apt_key: 
+      url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+      state: present  # latest
+
+  - name: "add the Elastic source list"
+    apt_repository:
+      repo: deb https://artifacts.elastic.co/packages/7.x/apt stable main
+      state: present  # latest
+
+  - name: "apt-get update"
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600 
+
+  # - name: "apt-get update"
+  #   apt:
+  #     update_cache: yes
+
+  - name: "Install elasticsearch"
+    apt: name=elasticsearch state=latest 
+
+  - name: "Elasticsearchs main configuration file elasticsearch.yml"   # 1 way to uncomment line && type new value
+    lineinfile:
+      # destfile: /etc/elasticsearch/elasticsearch.yml
+      destfile: /etc/elasticsearch/elasticsearch.yml.dpkg-dist    # file path
+      regexp: 'network.host:'                                     # 
+      line: 'network.host: localhost'
+
+  # - name: "Elasticsearchs main configuration file elasticsearch.yml"
+  #   lineinfile:
+  #     # destfile: /etc/elasticsearch/elasticsearch.yml
+  #     destfile: /etc/elasticsearch/elasticsearch.yml.dpkg-dist    # file path
+  #     regexp: 'http.port:'                                     # 
+  #     line: 'http.port: 9200'
+
+  - name: "elasticsearch configuration file changes  && uncomment #http.port: 9200 " # 2 Way only uncomment line
+    replace: 
+      path: /etc/elasticsearch/elasticsearch.yml.dpkg-dist
+      regexp: '#(.*http.port: 9200.*)' 
+      replace: '\1'   # 1st symbol is a #  so this command replace(remove) #
+
+
+  - name: "restart elasticsearch web server"
+    service: name=elasticsearch state=started
+
+
+
+  
+# ============================================================ Done ========================================================
+
+
+
+
+

@@ -1,0 +1,175 @@
+--- #    =============================================== installing Nginx  ========================================
+
+- hosts: vbox # check nano /etc/ansible/hosts && server ip
+  become: yes
+  tasks:
+  - name: "apt-get update"
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600    # 3600 seco..   means 1 hourse
+  
+  - name: "Install Nginx"
+    apt: name=nginx state=latest
+  
+  # - name: "restart nginx web server"
+  #   service: name=nginx state=restarted     # restart  ex:- sudo service nginx restart
+
+  - name: "config file"
+    copy:
+      src: /home/hey-nikto/Desktop/Ansible/ELK_Install/example.conf
+      dest: /etc/nginx/sites-available/
+  
+  - name: "create symbolic link"
+    file:
+      src: /etc/nginx/sites-available/example.conf
+      dest: /etc/nginx/sites-enabled/example.conf
+      state: link
+    # notify: restart nginx
+
+  # - name: "restart nginx"
+  #   service:
+  #       name: nginx
+  #       state: restarted
+  #   become: yes
+
+  - name: "restart nginx web server"
+    service: name=nginx state=started
+
+# ================================================================== DONE ==============================================
+# ============================================ UFW ==============================================
+  - name: "apt-get ufw"
+    apt: name=ufw state=latest
+
+  - name: "ufw allow"
+    command: sudo ufw allow 'Nginx HTTP'
+    
+  - name: "service restart"               #
+    service: name=ufw state=started     #
+
+# ================================================================== DONE ==============================================
+
+# =================================== elasticsearch ===========================================
+  - name: "Elasticsearch public GPG key into APT"
+    apt_key: 
+      url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+      state: present  # latest
+
+  - name: "add the Elastic source list"
+    apt_repository:
+      repo: deb https://artifacts.elastic.co/packages/7.x/apt stable main
+      state: present  # latest
+
+  - name: "apt-get update"
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600 
+
+  # - name: "apt-get update"
+  #   apt:
+  #     update_cache: yes
+
+  - name: "Install elasticsearch"
+    apt: name=elasticsearch state=latest 
+
+  - name: "Elasticsearchs main configuration file elasticsearch.yml"   # 1 way to uncomment line && type new value
+    lineinfile:
+      # destfile: /etc/elasticsearch/elasticsearch.yml
+      destfile: /etc/elasticsearch/elasticsearch.yml    # file path
+      regexp: 'network.host:'                                     # 
+      line: 'network.host: localhost'
+
+  # - name: "Elasticsearchs main configuration file elasticsearch.yml"
+  #   lineinfile:
+  #     # destfile: /etc/elasticsearch/elasticsearch.yml
+  #     destfile: /etc/elasticsearch/elasticsearch.yml.dpkg-dist    # file path
+  #     regexp: 'http.port:'                                     # 
+  #     line: 'http.port: 9200'
+
+  - name: "elasticsearch configuration file changes  && uncomment #http.port: 9200 " # 2 Way only uncomment line
+    replace: 
+      path: /etc/elasticsearch/elasticsearch.yml
+      regexp: '#(.*http.port: 9200.*)' 
+      replace: '\1'   # 1st symbol is a #  so this command replace(remove) #
+
+
+  - name: "restart elasticsearch web server"
+    service: name=elasticsearch state=started
+
+# ================================================================== DONE ==============================================
+
+# ======================================== Install Kibana  ======================================
+
+  - name: "Install Kibana "
+    apt: name=kibana state=latest
+
+  - name: "Kibana Conf && #server.port: 5601"
+    replace: 
+      path: /etc/kibana/kibana.yml
+      regexp: '#(.*server.port: 5601.*)'  # uncomment
+      replace: '\1'
+
+  - name: "Kibana Conf && #server.host: localhost"
+    replace: 
+      path: /etc/kibana/kibana.yml
+      regexp: '#(.*server.host: "localhost".*)' # uncomment
+      replace: '\1'
+
+  - name: "Kibana Conf && #elasticsearch.hosts: http://localhost:9200 "
+    replace: 
+      path: /etc/kibana/kibana.yml
+      regexp: '#(.*elasticsearch.hosts:.*)' 
+      replace: '\1'   # 1st symbol is a #  so this command replace(remove) #
+
+  - name: "restart Kibana"
+    service: name=kibana state=started
+
+# ================================================================== DONE ==============================================
+
+# ============================================= Install Logstash  =========================================
+
+  - name: "Install Logstash"
+    apt: name=logstash state=latest
+
+  - name: "config file  && 02-beats-input.conf"
+    copy:
+      src: /home/hey-nikto/Desktop/Ansible/ELK_Install/02-beats-input.conf  # src(your_pc) paste your file path
+      dest: /etc/logstash/conf.d/       # paste your remote server file path
+
+  - name: "config file  && 10-syslog-filter.conf"
+    copy:
+      src: /home/hey-nikto/Desktop/Ansible/ELK_Install/10-syslog-filter.conf
+      dest: /etc/logstash/conf.d/
+
+  - name: "config file  && 30-elasticsearch-output.conf"
+    copy:
+      src: /home/hey-nikto/Desktop/Ansible/ELK_Install/30-elasticsearch-output.conf    
+      dest: /etc/logstash/conf.d/
+
+  # - name: "Logstash configuration with this command"
+  #   command: sudo -u logstash /usr/share/logstash/bin/logstash --path.settings /etc/logstash -t
+
+  - name: "systemctl start logstash"
+    service: name=logstash state=started 
+
+# ================================================================== DONE ==============================================
+
+# =========================================== Filebeat ==========================================
+
+  - name: "Installing filebeat"
+    apt: name=filebeat state=latest
+
+  - name: "service start"
+    service: name=filebeat state=started
+
+# ================================================================== DONE ==============================================
+
+# ================================================= restart nginx  ==============================================
+
+  - name: "Nginx start"
+    service: name=nginx state=restarted
+
+# ansible-playbook demo-jdk.yml --extra-vars "ansible_sudo_pass=mr"  --limit 192.168.1.200
+    
+
+
+

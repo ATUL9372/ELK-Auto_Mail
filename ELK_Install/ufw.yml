@@ -1,0 +1,14 @@
+---
+
+- hosts: Ubuntu
+  become: true
+  tasks: 
+  - name: "apt-get ufw"
+    apt: name=ufw state=latest
+
+  - name: "ufw allow"
+    command: sudo ufw allow 'Nginx HTTP'
+    
+  - name: "service restart"               #
+    service: name=ufw state=started     #
+    

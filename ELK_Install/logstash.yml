@@ -1,0 +1,30 @@
+---
+
+- hosts: Ubuntu
+  become: true
+  tasks:
+
+  - name: "Install Logstash"
+    apt: name=logstash state=latest
+
+  - name: "config file  && 02-beats-input.conf"
+    copy:
+      src: /home/hey-nikto/Desktop/Ansible/ELK_Install/02-beats-input.conf  # src(your_pc) paste your file path
+      dest: /etc/logstash/conf.d/       # paste your remote server file path
+
+  - name: "config file  && 10-syslog-filter.conf"
+    copy:
+      src: /home/hey-nikto/Desktop/Ansible/ELK_Install/10-syslog-filter.conf
+      dest: /etc/logstash/conf.d/
+
+  - name: "config file  && 30-elasticsearch-output.conf"
+    copy:
+      src: /home/hey-nikto/Desktop/Ansible/ELK_Install/30-elasticsearch-output.conf    
+      dest: /etc/logstash/conf.d/
+
+  # - name: "Logstash configuration with this command"
+  #   command: sudo -u logstash /usr/share/logstash/bin/logstash --path.settings /etc/logstash -t
+
+  - name: "systemctl start logstash"
+    service: name=logstash state=started 
+    

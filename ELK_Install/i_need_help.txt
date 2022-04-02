@@ -1,0 +1,51 @@
+# apt update
+
+- name: Update apt cache if needed.
+apt: update_cache=yes cache_valid_time=3600
+------------------------
+# service start
+
+- name: restart apache
+service: name=apache2 state=restarted
+-------------------------
+
+## symbolink link
+
+- name: Symlink Drupal virtualhost to sites-enabled.
+file:
+src: "/etc/apache2/sites-available/{{ domain }}.dev.conf"
+dest: "/etc/apache2/sites-enabled/{{ domain }}.dev.conf"
+state: link
+notify: restart apache
+- name: Remove default virtualhost file.
+file:
+path: "/etc/apache2/sites-enabled/000-default"
+state: absent
+notify: restart apache
+-----------------------------
+
+- name: Add ondrej repository for later versions of PHP.
+apt_repository: repo='ppa:ondrej/php5' update_cache=yes
+
+tasks:
+   - name: Nginx setup
+     apt: pkg=nginx state=installed update_cache=true
+   - name: index.html copy
+     template: src=index.html.j2 dest=/usr/share/nginx/html/index.html
+
+
+
+
+     # Add the Java ppa repository
+- name: Add Java repository
+ apt_repository:
+   repo: ppa:webupd8team/java
+# Automatically accepts the Oracle License popup in the terminal
+- name: Automatically select the Oracle License
+ shell: echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
+# Install Java 8
+- name: Install the Java 8 package
+ apt:
+   name: oracle-java8-installer
+   state: present
+   update_cache: yes

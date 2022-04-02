@@ -1,0 +1,12 @@
+---
+
+- hosts: Ubuntu
+  become: true
+  tasks:
+
+  - name: "Installing filebeat"
+    apt: name=filebeat state=latest
+
+  - name: "service start"
+    service: name=filebeat state=started
+

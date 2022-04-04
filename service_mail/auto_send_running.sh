@@ -21,7 +21,7 @@ if [ "$output" == "$nginx_status" ];then
 
     else
 
-    echo "$s1_nginx \n $s2_nginx" | mail -s "$service_name Service is Down and Restarted now on $(hostname)" ajak5021@gmail.com , akaj5021@gmail
+    echo "$s1_nginx \n $s2_nginx" | mail -s "$service_name Service is Down and Restarted now on $(hostname)" <ENTER_YOUR_EMAIL_ID>
 fi
 
 done
